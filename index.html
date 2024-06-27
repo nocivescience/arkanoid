@@ -1,7 +1,7 @@
 <canvas id="canvas"></canvas>
 <script>
   var w = 400, h = 600, ballSize = 10, brickW = 30, brickH = 20, batW = 100, batH = 20;
-  let leftPressed = false, rightPressed = false, shootPressed = false;
+  let leftPressed = false, rightPressed = false, shooting = false, shotsLeft = 0;
   var ballX, ballY, dx, dy, bricks = [], batX = w / 2, batY = h - 50;
   var projectiles = [];
   var c = document.getElementById("canvas");
@@ -105,7 +105,12 @@
     switch (e.key) {
       case 'a': leftPressed = true; break;
       case 'd': rightPressed = true; break;
-      case 'p': shootPressed = true; break;
+      case 'p': 
+        if (!shooting) {
+          shooting = true;
+          shotsLeft = 10;
+        }
+        break;
     }
   });
 
@@ -113,13 +118,16 @@
     switch (e.key) {
       case 'a': leftPressed = false; break;
       case 'd': rightPressed = false; break;
-      case 'p': shootPressed = false; break;
     }
   });
 
   setInterval(function () {
-    if (shootPressed) {
+    if (shooting && shotsLeft > 0) {
       projectiles.push({ x: batX - 2.5, y: batY - 10 });
+      shotsLeft--;
+      if (shotsLeft == 0) {
+        shooting = false;
+      }
     }
   }, 200);
 
