@@ -1,79 +1,128 @@
 <canvas id="canvas"></canvas>
 <script>
-  var w=400, h=600, ballSize=10, brickW=30, brickH=20, batW=100, batH=20
-  var ballX, ballY, dx, dy, bricks=[], batX=w/2, batY=h-50
-  var c = document.getElementById("canvas")
-  var ctx = canvas.getContext("2d")
-  c.width = w; c.height = h
+  var w = 400, h = 600, ballSize = 10, brickW = 30, brickH = 20, batW = 100, batH = 20;
+  let leftPressed = false, rightPressed = false, shootPressed = false;
+  var ballX, ballY, dx, dy, bricks = [], batX = w / 2, batY = h - 50;
+  var projectiles = [];
+  var c = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+  c.width = w; c.height = h;
 
   function init() {
-    bricks=[], ballX=w/2, ballY=h-100, dx=1, dy=-1
+    bricks = [], ballX = w / 2, ballY = h - 100, dx = 1, dy = -1;
+    projectiles = [];
     for (var y = 0; y < 4; y++) {
-      for (var x = y; x < 10-y; x++) {
-        bricks.push({x: 50+x*brickW, y: 50+y*brickH, active: true})
+      for (var x = y; x < 10 - y; x++) {
+        bricks.push({ x: 50 + x * brickW, y: 50 + y * brickH, active: true });
       }
     }
   }
 
   function drawRect(color, x, y, w, h) {
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.rect(x, y, w, h)
-    ctx.fill()
-    ctx.stroke()
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.fill();
+    ctx.stroke();
   }
 
   function drawCircle(color, x, y, r) {
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.arc(x, y, r, 0, 2*Math.PI, false)
-    ctx.fill()
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+    ctx.fill();
   }
 
   function draw() {
-    drawRect('#eee', 0, 0, w, h)
-    drawCircle('#f00', ballX, ballY, ballSize)
+    drawRect('#eee', 0, 0, w, h);
+    drawCircle('#f00', ballX, ballY, ballSize);
     for (var i = 0; i < bricks.length; i++) {
-      var b = bricks[i]
-      if (!b.active) continue
-      drawRect('#0f0', b.x, b.y, brickW, brickH)
+      var b = bricks[i];
+      if (!b.active) continue;
+      drawRect('#0f0', b.x, b.y, brickW, brickH);
     }
-    drawRect('#00f', batX-batW/2, batY, batW, batH)
+    drawRect('#00f', batX - batW / 2, batY, batW, batH);
+
+    for (var i = 0; i < projectiles.length; i++) {
+      var p = projectiles[i];
+      drawRect('#ff0', p.x, p.y, 5, 10);
+    }
   }
 
   function move() {
-    if (ballX-ballSize+dx < 0 || ballX+ballSize+dx > w) dx = -dx
-    if (ballY-ballSize+dy < 0) dy = -dy
-    if (ballY-ballSize> batY) return false
-    if (ballY+ballSize > batY && ballX+ballSize > batX-batW/2 && ballX-ballSize < batX+batW/2) dy = -dy
-    ballX += dx
-    ballY += dy
+    if (ballX - ballSize + dx < 0 || ballX + ballSize + dx > w) dx = -dx;
+    if (ballY - ballSize + dy < 0) dy = -dy;
+    if (ballY - ballSize > batY) return false;
+    if (ballY + ballSize > batY && ballX + ballSize > batX - batW / 2 && ballX - ballSize < batX + batW / 2) dy = -dy;
+    ballX += dx;
+    ballY += dy;
+
     for (var i = 0; i < bricks.length; i++) {
-      var b = bricks[i]
-      if (!b.active) continue
-      if (b.x < ballX+ballSize && ballX-ballSize < b.x+brickW && b.y < ballY+ballSize && ballY-ballSize < b.y+brickH) {
-        b.active = false
-        dy = -dy
-        break
+      var b = bricks[i];
+      if (!b.active) continue;
+      if (b.x < ballX + ballSize && ballX - ballSize < b.x + brickW && b.y < ballY + ballSize && ballY - ballSize < b.y + brickH) {
+        b.active = false;
+        dy = -dy;
+        break;
       }
     }
-    return true
+
+    if (leftPressed && batX > batW / 2 + 10) batX -= 5;
+    if (rightPressed && batX < w - batW / 2 - 10) batX += 5;
+
+    for (var i = 0; i < projectiles.length; i++) {
+      var p = projectiles[i];
+      p.y -= 5;
+      if (p.y < 0) {
+        projectiles.splice(i, 1);
+        i--;
+        continue;
+      }
+      for (var j = 0; j < bricks.length; j++) {
+        var b = bricks[j];
+        if (!b.active) continue;
+        if (p.x < b.x + brickW && p.x + 5 > b.x && p.y < b.y + brickH && p.y + 10 > b.y) {
+          b.active = false;
+          projectiles.splice(i, 1);
+          i--;
+          break;
+        }
+      }
+    }
+
+    return true;
   }
 
   function game() {
     if (!move()) {
-      alert('Game over!')
-      init()
+      alert('Game over!');
+      init();
     }
-    draw()
+    draw();
   }
 
-  document.addEventListener("keydown", function(e) {
-    switch (e.keyCode) {
-      case 37: if (batX > batW) batX-=20; break
-      case 39: if (batX < w-batW) batX+=20; break
+  document.addEventListener("keydown", function (e) {
+    switch (e.key) {
+      case 'a': leftPressed = true; break;
+      case 'd': rightPressed = true; break;
+      case 'p': shootPressed = true; break;
     }
-  })
-  init()
-  setInterval(game, 1)
+  });
+
+  document.addEventListener("keyup", function (e) {
+    switch (e.key) {
+      case 'a': leftPressed = false; break;
+      case 'd': rightPressed = false; break;
+      case 'p': shootPressed = false; break;
+    }
+  });
+
+  setInterval(function () {
+    if (shootPressed) {
+      projectiles.push({ x: batX - 2.5, y: batY - 10 });
+    }
+  }, 200);
+
+  init();
+  setInterval(game, 10);
 </script>
