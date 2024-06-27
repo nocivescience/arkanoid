@@ -10,6 +10,7 @@
   const colorsBricks = [
     'red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta', 'lime', 'pink'
   ];
+  let currentColorBrick = 'red';
 
   function init() {
     bricks = [], ballX = w / 2, ballY = h - 100, dx = 1, dy = -1;
@@ -18,6 +19,7 @@
   }
 
   function generateBricks() {
+    currentColorBrick = colorsBricks[Math.floor(Math.random()*colorsBricks.length)];
     for (var y = 0; y < 4; y++) {
       for (var x = y; x < 10 - y; x++) {
         bricks.push({ x: 50 + x * brickW, y: 50 + y * brickH, active: true });
@@ -47,7 +49,7 @@
     for (var i = 0; i < bricks.length; i++) {
       var b = bricks[i];
       if (!b.active) continue;
-      drawRect(colorB, b.x, b.y, brickW, brickH);
+      drawRect(currentColorBrick, b.x, b.y, brickW, brickH);
     }
     drawRect('#00f', batX - batW / 2, batY, batW, batH);
 
