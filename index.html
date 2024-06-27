@@ -7,10 +7,17 @@
   var c = document.getElementById("canvas");
   var ctx = canvas.getContext("2d");
   c.width = w; c.height = h;
+  const colorsBricks = [
+    'red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta', 'lime', 'pink'
+  ];
 
   function init() {
     bricks = [], ballX = w / 2, ballY = h - 100, dx = 1, dy = -1;
     projectiles = [];
+    generateBricks();
+  }
+
+  function generateBricks() {
     for (var y = 0; y < 4; y++) {
       for (var x = y; x < 10 - y; x++) {
         bricks.push({ x: 50 + x * brickW, y: 50 + y * brickH, active: true });
@@ -34,12 +41,13 @@
   }
 
   function draw() {
+    const colorB=colorsBricks[Math.floor(Math.random()*colorsBricks.length)];
     drawRect('#eee', 0, 0, w, h);
     drawCircle('#f00', ballX, ballY, ballSize);
     for (var i = 0; i < bricks.length; i++) {
       var b = bricks[i];
       if (!b.active) continue;
-      drawRect('#0f0', b.x, b.y, brickW, brickH);
+      drawRect(colorB, b.x, b.y, brickW, brickH);
     }
     drawRect('#00f', batX - batW / 2, batY, batW, batH);
 
@@ -88,6 +96,10 @@
           break;
         }
       }
+    }
+
+    if (bricks.every(b => !b.active)) {
+      generateBricks();
     }
 
     return true;
