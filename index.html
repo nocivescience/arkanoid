@@ -1,150 +1,235 @@
-<canvas id="canvas"></canvas>
-<script>
-  var w = 400, h = 600, ballSize = 10, brickW = 30, brickH = 20, batW = 100, batH = 20;
-  let leftPressed = false, rightPressed = false, shooting = false, shotsLeft = 0;
-  var ballX, ballY, dx, dy, bricks = [], batX = w / 2, batY = h - 50;
-  var projectiles = [];
-  var c = document.getElementById("canvas");
-  var ctx = canvas.getContext("2d");
-  c.width = w; c.height = h;
-  const colorsBricks = [
-    'red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta', 'lime', 'pink'
-  ];
-  let currentColorBrick = 'red';
+<!DOCTYPE html>
+<html lang="en">
 
-  function init() {
-    bricks = [], ballX = w / 2, ballY = h - 100, dx = 1, dy = -1;
-    projectiles = [];
-    generateBricks();
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
   }
-
-  function generateBricks() {
-    currentColorBrick = colorsBricks[Math.floor(Math.random()*colorsBricks.length)];
-    for (var y = 0; y < 4; y++) {
-      for (var x = y; x < 10 - y; x++) {
-        bricks.push({ x: 50 + x * brickW, y: 50 + y * brickH, active: true });
-      }
-    }
+  canvas {
+    border: 1px solid black;
   }
+</style>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    var w = 400, h = 600, ballSize = 10, brickW = 30, brickH = 20, batW = 100, batH = 20;
+    let leftPressed = false, rightPressed = false, shooting = false, shotsLeft = 0;
+    var ballX, ballY, dx, dy, bricks = [], batX = w / 2, batY = h - 50;
+    var projectiles = [];
+    var c = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    c.width = w; c.height = h;
+    const colorsBricks = [
+      'red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta', 'lime', 'pink'
+    ];
+    let currentColorBrick = 'red';
 
-  function drawRect(color, x, y, w, h) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.fill();
-    ctx.stroke();
-  }
-
-  function drawCircle(color, x, y, r) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2 * Math.PI, false);
-    ctx.fill();
-  }
-
-  function draw() {
-    const colorB=colorsBricks[Math.floor(Math.random()*colorsBricks.length)];
-    drawRect('#eee', 0, 0, w, h);
-    drawCircle('#f00', ballX, ballY, ballSize);
-    for (var i = 0; i < bricks.length; i++) {
-      var b = bricks[i];
-      if (!b.active) continue;
-      drawRect(currentColorBrick, b.x, b.y, brickW, brickH);
-    }
-    drawRect('#00f', batX - batW / 2, batY, batW, batH);
-
-    for (var i = 0; i < projectiles.length; i++) {
-      var p = projectiles[i];
-      drawRect('#ff0', p.x, p.y, 5, 10);
-    }
-  }
-
-  function move() {
-    if (ballX - ballSize + dx < 0 || ballX + ballSize + dx > w) dx = -dx;
-    if (ballY - ballSize + dy < 0) dy = -dy;
-    if (ballY - ballSize > batY) return false;
-    if (ballY + ballSize > batY && ballX + ballSize > batX - batW / 2 && ballX - ballSize < batX + batW / 2) dy = -dy;
-    ballX += dx;
-    ballY += dy;
-
-    for (var i = 0; i < bricks.length; i++) {
-      var b = bricks[i];
-      if (!b.active) continue;
-      if (b.x < ballX + ballSize && ballX - ballSize < b.x + brickW && b.y < ballY + ballSize && ballY - ballSize < b.y + brickH) {
-        b.active = false;
-        dy = -dy;
-        break;
-      }
-    }
-
-    if (leftPressed && batX > batW / 2 + 10) batX -= 5;
-    if (rightPressed && batX < w - batW / 2 - 10) batX += 5;
-
-    for (var i = 0; i < projectiles.length; i++) {
-      var p = projectiles[i];
-      p.y -= 5;
-      if (p.y < 0) {
-        projectiles.splice(i, 1);
-        i--;
-        continue;
-      }
-      for (var j = 0; j < bricks.length; j++) {
-        var b = bricks[j];
-        if (!b.active) continue;
-        if (p.x < b.x + brickW && p.x + 5 > b.x && p.y < b.y + brickH && p.y + 10 > b.y) {
-          b.active = false;
-          projectiles.splice(i, 1);
-          i--;
-          break;
-        }
-      }
-    }
-
-    if (bricks.every(b => !b.active)) {
+    function init() {
+      bricks = [], ballX = w / 2, ballY = h - 100, dx = 1, dy = -1;
+      projectiles = [];
       generateBricks();
     }
 
-    return true;
-  }
-
-  function game() {
-    if (!move()) {
-      alert('Game over!');
-      init();
+    function generateBricks() {
+      currentColorBrick = colorsBricks[Math.floor(Math.random() * colorsBricks.length)];
+      const patterns = [pattern1, pattern2, pattern3, patternSpaceInvader, patternSpaceInvader2];
+      const chosenPattern = patterns[Math.floor(Math.random() * patterns.length)];
+      chosenPattern();
     }
-    draw();
-  }
 
-  document.addEventListener("keydown", function (e) {
-    switch (e.key) {
-      case 'a': leftPressed = true; break;
-      case 'd': rightPressed = true; break;
-      case 'p': 
-        if (!shooting) {
-          shooting = true;
-          shotsLeft = 10;
+    function pattern1() {
+      for (var y = 0; y < 4; y++) {
+        for (var x = y; x < 10 - y; x++) {
+          bricks.push({ x: 50 + x * brickW, y: 50 + y * brickH, active: true });
         }
-        break;
-    }
-  });
-
-  document.addEventListener("keyup", function (e) {
-    switch (e.key) {
-      case 'a': leftPressed = false; break;
-      case 'd': rightPressed = false; break;
-    }
-  });
-
-  setInterval(function () {
-    if (shooting && shotsLeft > 0) {
-      projectiles.push({ x: batX - 2.5, y: batY - 10 });
-      shotsLeft--;
-      if (shotsLeft == 0) {
-        shooting = false;
       }
     }
-  }, 200);
 
-  init();
-  setInterval(game, 10);
-</script>
+    function pattern2() {
+      for (var y = 0; y < 6; y++) {
+        for (var x = 0; x < 10; x++) {
+          if ((x + y) % 2 == 0) {
+            bricks.push({ x: 20 + x * brickW, y: 20 + y * brickH, active: true });
+          }
+        }
+      }
+    }
+
+    function pattern3() {
+      for (var y = 0; y < 4; y++) {
+        for (var x = 0; x < 10; x++) {
+          bricks.push({ x: 50 + x * brickW, y: 50 + y * brickH, active: true });
+        }
+      }
+    }
+
+    function patternSpaceInvader() {
+      const invaderShape = [
+        '01111110',
+        '11000011',
+        '11111111',
+        '10111101',
+        '10111101'
+      ];
+      for (var y = 0; y < invaderShape.length; y++) {
+        for (var x = 0; x < invaderShape[y].length; x++) {
+          if (invaderShape[y][x] === '1') {
+            bricks.push({ x: 50 + x * brickW, y: 50 + y * brickH, active: true });
+          }
+        }
+      }
+    }
+
+    function patternSpaceInvader2() {
+      const invaderShape = [
+        '01100110',
+        '11000011',
+        '11111111',
+        '00111100',
+        '11111111'
+      ];
+      for (var y = 0; y < invaderShape.length; y++) {
+        for (var x = 0; x < invaderShape[y].length; x++) {
+          if (invaderShape[y][x] === '1') {
+            bricks.push({ x: 50 + x * brickW, y: 50 + y * brickH, active: true });
+          }
+        }
+      }
+    }
+
+    function drawRect(color, x, y, w, h) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.rect(x, y, w, h);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawCircle(color, x, y, r) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+      ctx.fill();
+    }
+
+    function draw() {
+      drawRect('#eee', 0, 0, w, h);
+      drawCircle('#f00', ballX, ballY, ballSize);
+      for (var i = 0; i < bricks.length; i++) {
+        var b = bricks[i];
+        if (!b.active) continue;
+        drawRect(currentColorBrick, b.x, b.y, brickW, brickH);
+      }
+      drawRect('#00f', batX - batW / 2, batY, batW, batH);
+
+      for (var i = 0; i < projectiles.length; i++) {
+        var p = projectiles[i];
+        drawRect('#ff0', p.x, p.y, 5, 10);
+      }
+    }
+
+    function move() {
+      if (ballX - ballSize + dx < 0 || ballX + ballSize + dx > w) dx = -dx;
+      if (ballY - ballSize + dy < 0) dy = -dy;
+      if (ballY - ballSize > batY) return false;
+      if (ballY + ballSize > batY && ballX + ballSize > batX - batW / 2 && ballX - ballSize < batX + batW / 2) dy = -dy;
+      ballX += dx;
+      ballY += dy;
+
+      for (var i = 0; i < bricks.length; i++) {
+        var b = bricks[i];
+        if (!b.active) continue;
+        if (b.x < ballX + ballSize && ballX - ballSize < b.x + brickW && b.y < ballY + ballSize && ballY - ballSize < b.y + brickH) {
+          b.active = false;
+          dy = -dy;
+          break;
+        }
+      }
+
+      if (leftPressed && batX > batW / 2 + 10) batX -= 5;
+      if (rightPressed && batX < w - batW / 2 - 10) batX += 5;
+
+      for (var i = 0; i < projectiles.length; i++) {
+        var p = projectiles[i];
+        p.y -= 5;
+        if (p.y < 0) {
+          projectiles.splice(i, 1);
+          i--;
+          continue;
+        }
+        for (var j = 0; j < bricks.length; j++) {
+          var b = bricks[j];
+          if (!b.active) continue;
+          if (p.x < b.x + brickW && p.x + 5 > b.x && p.y < b.y + brickH && p.y + 10 > b.y) {
+            b.active = false;
+            projectiles.splice(i, 1);
+            i--;
+            break;
+          }
+        }
+      }
+
+      if (bricks.every(b => !b.active)) {
+        generateBricks();
+      }
+
+      return true;
+    }
+
+    function game() {
+      if (!move()) {
+        alert('Game over!');
+        init();
+      }
+      draw();
+    }
+
+    document.addEventListener("keydown", function (e) {
+      switch (e.key) {
+        case 'a': leftPressed = true; break;
+        case 'd': rightPressed = true; break;
+        case 'p':
+          if (!shooting) {
+            shooting = true;
+            shotsLeft = 10;
+          }
+          break;
+      }
+    });
+
+    document.addEventListener("keyup", function (e) {
+      switch (e.key) {
+        case 'a': leftPressed = false; break;
+        case 'd': rightPressed = false; break;
+      }
+    });
+
+    setInterval(function () {
+      if (shooting && shotsLeft > 0) {
+        projectiles.push({ x: batX - 2.5, y: batY - 10 });
+        shotsLeft--;
+        if (shotsLeft == 0) {
+          shooting = false;
+        }
+      }
+    }, 200);
+
+    init();
+    setInterval(game, 10);
+  </script>
+
+</body>
+
+</html>
